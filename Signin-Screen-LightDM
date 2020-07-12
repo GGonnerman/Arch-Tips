@@ -1,0 +1,42 @@
+# Disable old display manager
+
+## For gnome...
+sudo systemctl disable gdm
+
+# Install lightdm
+yay -S lightdm
+yay -S lightdm-webkit-theme-aether lightdm-webkit-theme-osmos lightdm-webkit-theme-litarvan lightdm-webkit2-theme-sapphire
+git clone https://github.com/davidmogar/lightdm-webkit2-dmg_blue.git /usr/share/lightdm-webkit/themes/lightdm-webkit-theme-dmg_blue
+git clone https://github.com/robinwyss/minimal-lightdm-webkit-theme.git /usr/share/lightdm-webkit/themes/lightdm-webkit-theme-minimal
+git clone https://github.com/Landryl/synthgreeter.git /usr/share/lightdm-webkit/themes/ligthdm-webkit-theme-synthgreeter
+
+
+
+# Maybe install lightdm-webkit2-greeter?
+# yaourt -S lightdm-webkit2-greeter
+
+# Enable lightdm on startup
+sudo systemctl enable lightdm
+
+# Configure lightdm
+cd /etc/lightdm
+sudo nvim lightdm.conf
+under [Seat:*]...
+greeter-session=lightdm-webkit2-greeter
+user-session=xmonad # name in /usr/share/xsessions/*.desktop
+display-setup-script=/usr/local/bin/autostart.sh # Only if autostart.sh exists
+
+# Configure webkit2 greeter
+sudo nvim lightdm-webkit2-greeter.conf
+
+# Theme options
+# Edit /etc/lightdm/lightdm-webkit2-greeter.conf
+# Names in /usr/share/lightdm-webkit/themes
+webkit_theme = lightdm-webkit-theme-aether
+webkit_theme = lightdm-webkit-theme-osmos
+webkit_theme = lightdm-theme-sapphire
+webkit_theme = lightdm-webkit-theme-dmg_blue
+webkit_theme = lightdm-webkit-theme-minimal
+webkit_theme = lightdm-webkit-theme-synthgreeter
+
+# Put backgrounds in /usr/share/backgounds w/ aether
