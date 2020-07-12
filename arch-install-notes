@@ -1,0 +1,158 @@
+# If you don't have ethernet cord/need wifi (as of july iso)
+iwctl
+device list
+station wlan0 (or whatever device you found) scan
+station wlan0 (^) get-networks
+station wlan0 (^) connect abc123 (whatever wifi you found)
+(enter your wifi password)
+
+# Update package database
+pacman -Syyy
+
+# Figure out which disk you're planning to boot from
+# then partition the disk and boot/root/home
+
+# Start fdisk
+fdisk /dev/sdX
+
+# Partition the drive as needed
+g (creates gpt label)
+n (new), default (partition number), default (start sector), +1G (end sector)
+t (change type), 1 (turn into boot partition)
+n, default, default, +30G
+n, default, default, default
+w
+
+# Set partitions to correct file formats
+mkfs.fat -F32 /dev/sdX1 (boot)
+mkfs.ext4 /dev/sdX2 (root)
+mkfs.ext4 /dev/sdX3 (home)
+
+# Mount all partitions
+mount /dev/sdX2 /mnt
+mkdir /mnt/boot
+mkdir /mnt/home
+mount /dev/sdX1 /mnt/boot
+mount /dev/sdX3 /mnt/home
+
+# Install base arch onto your disk
+pacstrap /mnt base base-devel linux linux-firmware linux-headers neovim
+
+# Generate fstab (tell your computer where to mount things when booting)
+genfstab -U /mnt >> /mnt/etc/fstab
+
+# Chroot into your new system
+arch-chroot /mnt
+
+# Create and active your swap file
+fallocate -l 2GB /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+# Add swap file to fstab
+nvim /etc/fstab
+(add this below everything else) /swapfile none swap defaults 0 0
+
+# Set timezone
+ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime
+hwclock --systohc
+nvim /etc/locale.gen (uncomment line that says en_US.UTF-8)
+locale-gen
+echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+
+# Set hostname
+echo "machine" > /etc/hostname
+nvim /etc/hosts
+(type all this)
+
+127.0.0.1	localhost
+::1		localhost
+127.0.1.1	machine.localdomain machine
+
+# Set password for root account
+passwd
+
+# Install grub, bootloader, as well as a few other packages
+pacman -S
+sudo # To allow super user
+grub efibootmgr # To manage booting
+networkmanager networkwork-manager-applet # For network management
+wireless_tools wpa_supplicant # For wireless networking
+dialog # Allows shell scripts to open dialog boxes
+os-prober # For if you plan to dual boot
+mtools dosfstools # For working with fat file systems
+bluez bluez-utils # For bluetooth
+cups # Printer
+git # For yay
+pulseaudio pulseaudio-bluetooth pulseaudio-alsa pulseaudio-equalizer pulseaudio-jack
+xdg-utils xdg-user-dirs # to create user directories
+
+# Install grub
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Enable services
+systemctl enable NetworkManager # Network manager
+systemctl enable bluetooth # Bluetooth
+systemctl enable org.cups.cupsd # Printer
+
+# Add a new user
+useradd -mG wheel twoonesecond
+passwd twoonesecond
+
+# Allow wheel group to use sudo
+EDITOR=nvim visudo
+uncomment the line
+# %wheel ALL=(ALL) ALL
+
+# Exit the system and reboot
+exit
+umount -R /mnt
+reboot
+
+# Active your connect
+nmtui
+(Active a connect)
+select yours and enter the password
+
+# Install yay (to use the aur)
+git clone https://aur.archlinux.org/yay.git
+cd yay
+makepkg -si PKGBUILD
+cd ..
+rm -fr yay
+
+# Install graphics drivers
+# Don't do this, it probably doesn't work
+# Please see wiki.archlinux.org/index.php/NVIDIA#Installation
+pacman -S xf86-video-intel nvidia nvidia-utils
+yay -S xf86-video-intel nvidia-390xx-dkms
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
