@@ -1,15 +1,11 @@
 # This is all you should need to do:
 
-pacman -S xmonad xmonad-contrib dmenu
+pacman -S xmonad xmonad-contrib dmenu xmobar kitty
 
 # If you haven't installed X, do so with the following command:
 
 pacman -S xorg-server xorg-xinit
 
-# Install xmobar with all extensions
-yay -S xmobar-git --mflags="-f all_extensions"
-
 # Install required packages
 pacman -S xdotool
 pacman -S pacman-contrib
-

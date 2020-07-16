@@ -6,6 +6,10 @@ station wlan0 (^) get-networks
 station wlan0 (^) connect abc123 (whatever wifi you found)
 (enter your wifi password)
 
+# IF WIFI IS SUPER SLOW
+# systemctl stop systemd-resolved.service
+# https://www.reddit.com/r/archlinux/comments/ezps4r/extremely_slow_first_ping_since_recent_update/fgp3gdp
+
 # Update package database
 pacman -Syyy
 
@@ -19,6 +23,8 @@ fdisk /dev/sdX
 g (creates gpt label)
 n (new), default (partition number), default (start sector), +1G (end sector)
 t (change type), 1 (turn into boot partition)
+n, default, +(2*ram)G
+t, 19 (linux swap)
 n, default, default, +30G
 n, default, default, default
 w
@@ -35,6 +41,10 @@ mkdir /mnt/home
 mount /dev/sdX1 /mnt/boot
 mount /dev/sdX3 /mnt/home
 
+# Active your swap file
+mkswap /swapfile
+swapon /swapfile
+
 # Install base arch onto your disk
 pacstrap /mnt base base-devel linux linux-firmware linux-headers neovim
 
@@ -43,16 +53,6 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 # Chroot into your new system
 arch-chroot /mnt
-
-# Create and active your swap file
-fallocate -l 2GB /swapfile
-chmod 600 /swapfile
-mkswap /swapfile
-swapon /swapfile
-
-# Add swap file to fstab
-nvim /etc/fstab
-(add this below everything else) /swapfile none swap defaults 0 0
 
 # Set timezone
 ln -sf /usr/share/zoneinfo/America/Chicago /etc/localtime
@@ -128,31 +128,3 @@ rm -fr yay
 # Please see wiki.archlinux.org/index.php/NVIDIA#Installation
 pacman -S xf86-video-intel nvidia nvidia-utils
 yay -S xf86-video-intel nvidia-390xx-dkms
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
